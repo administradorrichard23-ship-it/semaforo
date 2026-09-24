@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratorio: Semáforo Automático</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+
+        /* 1. DIBUJA (Estructura de la caja) */
+        .caja-semaforo {
+            width: 120px;
+            background-color: #333;
+            padding: 20px;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+        }
+
+        /* 1. DIBUJA (Círculos apagados por defecto) */
+        .circulo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: #444; /* Color apagado general */
+            transition: background-color 0.3s;
+        }
+
+        /* PUNTO EXTRA: Animación de latido (pulsación suave) */
+        @keyframes latido {
+            0% { transform: scale(1); opacity: 0.9; }
+            50% { transform: scale(1.04); opacity: 1; box-shadow: 0 0 20px currentcolor; }
+            100% { transform: scale(1); opacity: 0.9; }
+        }
+
+        .encendido {
+            animation: latido 1.5s infinite ease-in-out;
+        }
+
+        /* Colores encendidos específicos */
+        #rojo.encendido { background-color: #ff3b30; color: #ff3b30; }
+        #ambar.encendido { background-color: #ffcc00; color: #ffcc00; }
+        #verde.encendido { background-color: #4cd964; color: #4cd964; }
+
+        /* Estilo del botón de eventos */
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 5px;
+        }
+        button:hover { background-color: #0056b3; }
+    </style>
+</head>
+<body>
+
+    <!-- 1. DIBUJA: Caja y tres círculos con sus IDs -->
+    <div class="caja-semaforo">
+        <div id="rojo" class="circulo"></div>
+        <div id="ambar" class="circulo"></div>
+        <div id="verde" class="circulo"></div>
+    </div>
+
+    <!-- 3. EVENTO: Botón para avanzar manualmente -->
+    <button id="btn-avanzar">Avanzar Luz</button>
+
+    <script>
+        // Arreglo con los IDs de las luces para manejarlas por índice (0=rojo, 1=ámbar, 2=verde)
+        const luces = ['rojo', 'ambar', 'verde'];
+        
+        // CORREGIDO: Tiempos asignados correctamente (3s rojo, 1s ámbar, 3s verde en milisegundos)
+        const tiempos =[3000, 1000, 3000];
+        
+        let i = 0; // Índice de la luz actual
+        let temporizador; // Variable para controlar el ciclo automático
+
+        // 2. APAGA Y PRENDE: Función encargada de pintar una luz y apagar las otras dos
+        function encender(cual) {
+            luces.forEach((id, index) => {
+                const elemento = document.getElementById(id);
+                if (index === cual) {
+                    elemento.classList.add('encendido'); // Enciende
+                } else {
+                    elemento.classList.remove('encendido'); // Apaga las demás
+                }
+            });
+        }
+
+        // 4. AUTOMÁTICO: Función recursiva con setTimeout para manejar tiempos variables
+        function iniciarCicloAutomatico() {
+            encender(i);
+            
+            // Define cuánto tiempo se queda en la luz actual antes de pasar a la siguiente
+            temporizador = setTimeout(() => {
+                i = (i + 1) % 3; // Avanza el índice de forma circular (0 -> 1 -> 2 -> 0)
+                iniciarCicloAutomatico();
+            }, tiempos[i]);
+        }
+
+        // 3. EVENTO: Evento click en el botón para avanzar manualmente
+        document.getElementById('btn-avanzar').addEventListener('click', () => {
+            clearTimeout(temporizador); // Detiene el temporizador automático actual para no solaparse
+            i = (i + 1) % 3;            // Avanza al siguiente color
+            iniciarCicloAutomatico();    // Enciende y reanuda el ciclo automático desde ahí
+        });
+
+        // Iniciar el semáforo al cargar la página
+        iniciarCicloAutomatico();
+    </script>
+</body>
+</html>
